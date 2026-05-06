@@ -61,8 +61,4 @@ if archivo:
     st.success(f"## {info['nombre']}")
     st.write(f"**Confianza:** {confianza:.2f}%")
     st.write(f"*Nombre científico:* {info['cientifico']}")
-<<<<<<< HEAD
-    st.info(info['info'])
-=======
-    st.info(info['info'])
->>>>>>> 30cc5bf689195d60b862273e28a583e1dcc1b187
+
