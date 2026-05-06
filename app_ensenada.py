@@ -11,7 +11,7 @@ st.title("🌸 EndémicaEns: Flora de Ensenada")
 # El orden de estas llaves determinará el orden alfabético que usa la IA
 especies_info = {
     "amapola_de_california": {
-        "nombre": "Amapola de California",
+        "nombre": "Amapola_de_California",
         "cientifico": "Eschscholzia californica",
         "estado": "Nativa",
         "info": "Flor brillante de color naranja. Es muy resistente a la sequía y se cierra por las noches.",
