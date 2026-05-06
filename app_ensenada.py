@@ -8,13 +8,13 @@ st.set_page_config(page_title="EndémicaEns", page_icon="🌸")
 st.title("🌸 EndémicaEns: Flora de Ensenada")
 
 # --- DICCIONARIO DE ESPECIES ---
-# El orden de estas llaves determinará el orden alfabético que usa la IA
+# Nota: Corregido "rosa de castilla" con la letra 'i'
 especies_info = {
     "amapola_de_california": {
         "nombre": "Amapola de California",
         "cientifico": "Eschscholzia californica",
         "estado": "Nativa",
-        "info": "Flor brillante de color naranja. Es muy resistente a la sequía y se cierra por las noches.",
+        "info": "Flor brillante de color naranja. Es muy resistente a la sequía.",
         "cuidados": "Mucho sol y casi nada de agua.",
         "plantacion": "Finales de invierno."
     },
@@ -22,7 +22,7 @@ especies_info = {
         "nombre": "Choya / Cacto de Ensenada",
         "cientifico": "Cylindropuntia californica",
         "estado": "Nativa",
-        "info": "Cacto muy espinoso típico del matorral costero. Sus espinas se pegan fácilmente.",
+        "info": "Cacto muy espinoso típico del matorral costero.",
         "cuidados": "Cero riego adicional, suelo muy arenoso.",
         "plantacion": "Todo el año."
     },
@@ -30,7 +30,7 @@ especies_info = {
         "nombre": "Incienso / Encelia",
         "cientifico": "Encelia farinosa",
         "estado": "Nativa",
-        "info": "Arbusto de flores amarillas. Sus hojas grisáceas reflejan la luz para sobrevivir al calor.",
+        "info": "Arbusto de flores amarillas. Sus hojas son grisáceas.",
         "cuidados": "Muy poca agua, pleno sol.",
         "plantacion": "Primavera."
     },
@@ -38,15 +38,15 @@ especies_info = {
         "nombre": "Encino Californiano",
         "cientifico": "Quercus agrifolia",
         "estado": "Nativa / Protegida",
-        "info": "Árbol majestuoso de los arroyos de Ensenada. Fundamental para el ecosistema local.",
-        "cuidados": "Evitar exceso de riego en el tronco durante el verano.",
+        "info": "Árbol majestuoso fundamental para el ecosistema local.",
+        "cuidados": "Evitar exceso de riego en el tronco.",
         "plantacion": "Otoño."
     },
     "lila_california_ceanothus": {
         "nombre": "Lila de California",
         "cientifico": "Ceanothus spp.",
         "estado": "Nativa Regional",
-        "info": "Famosa por sus racimos de flores azules o moradas. Atrae a muchas mariposas.",
+        "info": "Famosa por sus racimos de flores azules o moradas.",
         "cuidados": "Requiere poco riego una vez establecida.",
         "plantacion": "Otoño o Invierno."
     },
@@ -54,7 +54,7 @@ especies_info = {
         "nombre": "Maguey de Costa",
         "cientifico": "Agave shawii",
         "estado": "Nativa Regional",
-        "info": "Suculenta protegida que crece frente al mar. Sus flores atraen a murciélagos.",
+        "info": "Suculenta protegida que crece frente al mar.",
         "cuidados": "Suelo arenoso y mucha brisa marina.",
         "plantacion": "Invierno."
     },
@@ -62,7 +62,7 @@ especies_info = {
         "nombre": "Rosa de Castilla",
         "cientifico": "Rosa minutifolia",
         "estado": "Endémica de BC",
-        "info": "La joya de Ensenada. Pequeña, muy espinosa y con flores rosas vibrantes.",
+        "info": "La joya de Ensenada. Pequeña, espinosa y flores rosas vibrantes.",
         "cuidados": "Cero riego una vez establecida.",
         "plantacion": "Temporada de lluvias."
     },
@@ -70,7 +70,7 @@ especies_info = {
         "nombre": "Salvia de Munz",
         "cientifico": "Salvia munzii",
         "estado": "Nativa Regional",
-        "info": "Arbusto aromático de flores moradas, esencial para los polinizadores.",
+        "info": "Arbusto aromático esencial para polinizadores.",
         "cuidados": "Sol directo y suelo bien drenado.",
         "plantacion": "Primavera."
     }
@@ -80,33 +80,41 @@ especies_info = {
 @st.cache_resource
 def load_model():
     try:
-        # Intento de carga estándar
         return tf.keras.models.load_model('modelo_flores_nuevo.keras')
     except:
-        # Carga sin compilación (por si hay diferencias de versiones)
         return tf.keras.models.load_model('modelo_flores_nuevo.keras', compile=False)
 
 model = load_model()
 
-# --- INTERFAZ DE USUARIO ---
+# --- INTERFAZ ---
 archivo = st.file_uploader("Sube una foto de la flora local", type=["jpg", "png", "jpeg", "webp"])
 
 if archivo:
     img = Image.open(archivo)
-    st.image(img, use_container_width=True) # Actualizado para versiones modernas de Streamlit
+    st.image(img, use_container_width=True)
     
     # Preprocesamiento
     img_resized = img.resize((180, 180))
     img_array = tf.keras.utils.img_to_array(img_resized)
-    img_array = tf.expand_dims(img_array, 0) # Crear el batch (1, 180, 180, 3)
+    img_array = tf.expand_dims(img_array, 0)
     
     # Predicción
-    with st.spinner('Identificando especie...'):
+    with st.spinner('Identificando...'):
         pred = model.predict(img_array)
         score = tf.nn.softmax(pred[0])
     
-    # Obtener etiquetas ordenadas alfabéticamente (igual que en el entrenamiento)
-    nombres_carpetas = sorted(list(especies_info.keys()))
+    # LISTA MANUAL: Debe coincidir al 100% con el orden alfabético de tus carpetas
+    nombres_carpetas = [
+        "amapola_de_california",
+        "choya_californiana",
+        "encelia farinosa",
+        "encino_quercus_agrifolia",
+        "lila_california_ceanothus",
+        "maguey de la costa_agabe_shawii",
+        "rosa de castilla_rosa_minutifolia",
+        "salvia de munz_salvia_munzii"
+    ]
+    
     indice_detectado = np.argmax(score)
     clase_detectada = nombres_carpetas[indice_detectado]
     confianza = 100 * np.max(score)
@@ -119,6 +127,5 @@ if archivo:
     with st.expander("📖 Ver Detalles Técnicos"):
         st.write(f"**Científico:** *{info['cientifico']}*")
         st.write(f"**Estado:** {info['estado']}")
-        st.info(f"**Descripción:** {info['info']}")
-        st.warning(f"**Recomendación de Cuidado:** {info['cuidados']}")
-        st.write(f"**Época ideal de plantación:** {info['plantacion']}")
+        st.info(info['info'])
+        st.warning(f"**Cuidados:** {info['cuidados']}")
